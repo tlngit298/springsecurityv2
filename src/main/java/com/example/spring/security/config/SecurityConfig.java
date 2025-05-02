@@ -1,5 +1,6 @@
 package com.example.spring.security.config;
 
+import com.example.spring.security.exceptionhandling.CustomAccessDeniedHandler;
 import com.example.spring.security.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,12 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .sessionManagement(smc -> smc
+                        .invalidSessionUrl("/invalid-session")
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true)
+//                        .expiredUrl("/expired")
+                )
 //                .requiresChannel(rcc -> rcc.anyRequest().requiresSecure())
 //                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((request) -> request
@@ -33,8 +40,8 @@ public class SecurityConfig {
         httpSecurity.formLogin(Customizer.withDefaults());
         httpSecurity.httpBasic(hbc ->
                 hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
-//        httpSecurity.exceptionHandling(ehc ->
-//                ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        httpSecurity.exceptionHandling(ehc ->
+                ehc.accessDeniedHandler(new CustomAccessDeniedHandler()));
         return httpSecurity.build();
     }
 
