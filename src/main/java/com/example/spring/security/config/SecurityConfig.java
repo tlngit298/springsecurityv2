@@ -2,6 +2,7 @@ package com.example.spring.security.config;
 
 import com.example.spring.security.exceptionhandling.CustomAccessDeniedHandler;
 import com.example.spring.security.exceptionhandling.CustomBasicAuthenticationEntryPoint;
+import com.example.spring.security.filter.CsrfCookiesFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import javax.sql.DataSource;
 
@@ -31,7 +34,8 @@ public class SecurityConfig {
 //                        .expiredUrl("/expired")
                 )
 //                .requiresChannel(rcc -> rcc.anyRequest().requiresSecure())
-//                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrfConfig -> csrfConfig.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .addFilterAfter(new CsrfCookiesFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((request) -> request
 //                        .requestMatchers(HttpMethod.GET, "/home").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/register").permitAll()
